@@ -1,10 +1,10 @@
 //! Default Compute@Edge template program.
 
+use fastly::geo::geo_lookup;
 use fastly::http::{header, Method, StatusCode};
 use fastly::{Error, Request, Response};
 
 use serde_json::json;
-
 /// The entry point for your application.
 ///
 /// This function is triggered when your service receives a client request. It could be used to
@@ -57,16 +57,23 @@ fn main(req: Request) -> Result<Response, Error> {
             // let mut endpoint = fastly::log::Endpoint::from_name("my_endpoint");
             // writeln!(endpoint, "Hello from the edge!").unwrap();
             let mut resp = Response::from_status(StatusCode::OK);
+            let client_ip = req.get_client_ip_addr().unwrap();
+            let geo = fastly::geo::geo_lookup(client_ip).unwrap();
 
             let my_data = json!({
                 "trace_id": std::env::var("FASTLY_TRACE_ID").unwrap_or_else(|_| String::new()),
-                "client_ip": req.get_client_ip_addr().unwrap().to_string(),
+                "client_ip": client_ip.to_string(),
+                "geo_country": geo.country_name(),
+                "geo_city": geo.city(),
+                "host": req.get_header_str("Host"),
+                "request_method": req.get_method_str(),
                 "url": req.get_url_str(),
-                "request_user_agent": req.get_header_str("User-Agent").unwrap(),
+                "request-referer": req.get_header_str("Referer"),
+                "request_user_agent": req.get_header_str("User-Agent"),
                 "response_status": resp.get_status().as_u16(),
                 "response_reason": resp.get_status().canonical_reason(),
                 "fastly_server": std::env::var("FASTLY_POP").unwrap_or_else(|_| String::new()),
-                "fastly_host": std::env::var("FASTLY_HOSTNAME").unwrap_or_else(|_| String::new()),
+                "fastly_hostname": std::env::var("FASTLY_HOSTNAME").unwrap_or_else(|_| String::new()),
                 "fastly_service_id": std::env::var("FASTLY_SERVICE_ID").unwrap_or_else(|_| String::new()),
                 "fastly_service_version": std::env::var("FASTLY_SERVICE_VERSION").unwrap_or_else(|_| String::new()),
             });
