@@ -4,7 +4,9 @@ use fastly::geo::geo_lookup;
 use fastly::http::{header, Method, StatusCode};
 use fastly::{Error, Request, Response};
 
+use chrono::{Utc};
 use serde_json::json;
+
 /// The entry point for your application.
 ///
 /// This function is triggered when your service receives a client request. It could be used to
@@ -32,35 +34,15 @@ fn main(req: Request) -> Result<Response, Error> {
     match req.get_path() {
         // If request is to the `/` path...
         "/" => {
-            // Below are some common patterns for Compute@Edge services using Rust.
-            // Head to https://developer.fastly.com/learning/compute/rust/ to discover more.
-
-            // Create a new request.
-            // let mut bereq = Request::get("http://httpbin.org/headers")
-            //     .with_header("X-Custom-Header", "Welcome to Compute@Edge!")
-            //     .with_ttl(60);
-
-            // Add request headers.
-            // bereq.set_header(
-            //     "X-Another-Custom-Header",
-            //     "Recommended reading: https://developer.fastly.com/learning/compute",
-            // );
-
-            // Forward the request to a backend.
-            // let mut beresp = bereq.send("backend_name")?;
-
-            // Remove response headers.
-            // beresp.remove_header("X-Another-Custom-Header");
-
-            // Log to a Fastly endpoint.
-            // use std::io::Write;
-            // let mut endpoint = fastly::log::Endpoint::from_name("my_endpoint");
-            // writeln!(endpoint, "Hello from the edge!").unwrap();
             let mut resp = Response::from_status(StatusCode::OK);
             let client_ip = req.get_client_ip_addr().unwrap();
             let geo = fastly::geo::geo_lookup(client_ip).unwrap();
 
-            let my_data = json!({
+            log_fastly::init_simple("my_endpoint", log::LevelFilter::Info);
+
+            // Get some data to log
+            let record = json!({
+                "timestamp": Utc::now().format("%Y-%m-%d %H:%M:%S%.6f").to_string(),
                 "trace_id": std::env::var("FASTLY_TRACE_ID").unwrap_or_else(|_| String::new()),
                 "client_ip": client_ip.to_string(),
                 "geo_country": geo.country_name(),
@@ -77,11 +59,13 @@ fn main(req: Request) -> Result<Response, Error> {
                 "fastly_service_id": std::env::var("FASTLY_SERVICE_ID").unwrap_or_else(|_| String::new()),
                 "fastly_service_version": std::env::var("FASTLY_SERVICE_VERSION").unwrap_or_else(|_| String::new()),
             });
+
+            log::info!("{}", record);
  
+            // Send the JSON in the response
+            resp.set_body_json(&record).unwrap();     
 
-            resp.set_body_json(&my_data).unwrap();     
-
-            // Send a default synthetic response.
+            // Send the response
             return Ok(resp);
         }
 

@@ -11,5 +11,9 @@ publish = false
 debug = 1
 
 [dependencies]
-fastly = "^0.8.0"
+fastly = "0.8.7"
+log-fastly = "0.8.7"
+log = "0.4.17"
+chrono = "0.4"
 serde_json = "1.0.85"
+
