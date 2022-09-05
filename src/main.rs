@@ -61,6 +61,9 @@ fn main(req: Request) -> Result<Response, Error> {
             });
 
             log::info!("{}", record);
+
+            // This message will show in the log-tail
+            println!("{}", record);
  
             // Send the JSON in the response
             resp.set_body_json(&record).unwrap();     
