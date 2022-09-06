@@ -2,7 +2,6 @@
 
 This demo is intended to provide a quick example of a C@E service that logs JSON to a 3rd party endpoint.
 
-Note: 
 ## Understanding the Code
 
 This demo is intentional lightweight and is  demo intended to get you up and running quickly with logging. Refer to the Fastly docs for more information about configuring the logs.
