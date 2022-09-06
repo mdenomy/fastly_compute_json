@@ -1,23 +1,35 @@
-# Default Starter Kit for Rust
+# Simple Demo of Logging in Compute@Edge
 
-[![Deploy to Fastly](https://deploy.edgecompute.app/button)](https://deploy.edgecompute.app/deploy)
+This demo is intended to provide a quick example of a C@E service that logs JSON to a 3rd party endpoint.
 
-Get to know the Fastly Compute@Edge environment with a basic starter that demonstrates routing, simple synthetic responses and code comments that cover common patterns.
+Note: 
+## Understanding the Code
 
-**For more details about this and other starter kits for Compute@Edge, see the [Fastly Developer Hub](https://developer.fastly.com/solutions/starters/)**.
+This demo is intentional lightweight and is  demo intended to get you up and running quickly with logging. Refer to the Fastly docs for more information about configuring the logs.
 
-## Features
+The demo doesn't require the use of any backends. Once deployed, you will have a Fastly service running on Compute@Edge that can generate synthetic responses at the edge.
 
-- Allow only requests with particular HTTP methods
-- Match request URL path and methods for routing
-- Build synthetic responses at the edge
+## Running the Service
 
-## Understanding the code
+See the Fastly docs for getting set up on Compute@Edge at edge. 
 
-This starter is intentionally lightweight, and requires no dependencies aside from the [`fastly`](https://docs.rs/fastly) crate. It will help you understand the basics of processing requests at the edge using Fastly. This starter includes implementations of common patterns explained in our [using Compute@Edge](https://developer.fastly.com/learning/compute/rust/) and [VCL migration](https://developer.fastly.com/learning/compute/migrate/) guides.
+Once you have created a new Compute service and obtained a Fastly API key, copy the service name and ID (e.g. from the UI) into the `fastly.toml` file
 
-The starter doesn't require the use of any backends. Once deployed, you will have a Fastly service running on Compute@Edge that can generate synthetic responses at the edge.
+```toml
+name = "<your service name>"
+service_id = "<your service ID>"
+```
 
-## Security issues
+Configure an endpoint named `my_endpoint`. See the Fastly documentation for how to configuring an endpoint. Save the service with the configured endpoint
 
-Please see [SECURITY.md](SECURITY.md) for guidance on reporting security-related issues.
+Deploy your service
+
+``` sh
+fastly compute publish
+```
+
+Start the log tail
+
+```
+fastly log-tail
+```
